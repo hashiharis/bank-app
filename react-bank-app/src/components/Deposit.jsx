@@ -1,53 +1,75 @@
 import { useState } from "react";
 
 // eslint-disable-next-line react/prop-types
-export const Deposit=({accUser,accNo})=>{
+export const Deposit = ({accNo,accUser}) => {
+  const [currentDeposit, setCurrentDeposit] = useState(0);
+  const [balance, setBalance] = useState(0);
+  const [withdraw, setWithdraw] = useState(0);
 
-    const[deposit,setDeposit]=useState({})
+  const handleTransactions = (e) => {
+    e.preventDefault();
+    let deposit;
+    let withdrawAmount;
 
-    const handleDeposit=(e)=>{
-        const{value}=e.target;
-        setDeposit({
-            ...deposit,
-            amount:value
-        })
+    if (!accNo && !accUser) {
+      alert("account not found");
+      return;
+    }
+    if (currentDeposit) {
+      deposit = currentDeposit;
+      deposit = parseInt(deposit);
+
+      console.log("deposit:", deposit);
+      setBalance((prevBalance) => prevBalance + deposit);
+      setCurrentDeposit(0);
     }
 
-    const handlePayment=(e)=>{
-        const{value}=e.target;
-        setDeposit({
-            ...deposit,
-            paymentMethod:value
-        })
-    }
-    const handleSubmit=(e)=>{
-         e.preventDefault();
-         if(!accNo && !accUser){
-            alert("account not found")
-            return
-         }
-         setDeposit({
-            accNo,
-            accUser,
-            ...deposit
-         }
-           )
-    }
-    return(
-        <form onSubmit={handleSubmit}>
-            <h1>Deposit Form</h1>
-           <h4>Account Holder :{accUser} </h4>
-            <h4>Account No: {accNo}</h4>
-            <label>Amount to Deposit</label>
-            <input type="number" onChange={handleDeposit} value={deposit.amount}/>
-            <select onChange={handlePayment}>
-                Select Payment Method
-                <option value="Debit/Credit Card">Debit/Credit Card</option>
-                <option value="Via UPI">Via UPI</option>
-                <option value="NetBanking">NetBanking</option>
-            </select>
-            <button>Deposit</button>
-            {deposit && (<div>Amount Deposited:{deposit.amount} via {deposit.paymentMethod}</div>)}
-        </form>
-    )
-}
+      if (withdraw) {
+        if ((balance-withdraw)<= 500) {
+            alert("Balance is not sufficient for withdrawal");
+            setWithdraw(0);
+            return;
+          }
+        withdrawAmount = withdraw;
+        withdrawAmount = parseInt(withdrawAmount);
+        console.log("withdraw:", withdraw);
+        setBalance((prevBalance) => prevBalance - withdrawAmount);
+        setWithdraw(0);
+      }
+      
+  };
+  console.log("After withdraw:", balance);
+  return (
+    <>
+      <h1>Deposit Form</h1>
+      <h4>Account Holder :{accUser} </h4>
+      <h4>Account No: {accNo}</h4>
+      <form onSubmit={handleTransactions}>
+        <label>Amount to Deposit</label>
+        <input
+          type="number"
+          onChange={(e) => {
+            setCurrentDeposit(e.target.value);
+          }}
+          value={currentDeposit}
+        />
+        <button type="button" onClick={handleTransactions}>
+          Deposit
+        </button>
+        {currentDeposit != 0 && <div>Amount Deposited:{currentDeposit}</div>}
+        <label>Amount to Withdraw</label>
+        <input
+          type="number"
+          onChange={(e) => {
+            setWithdraw(e.target.value);
+          }}
+          value={withdraw}
+        />
+        <button type="button" onClick={handleTransactions}>
+          Withdraw
+        </button>
+        <div>Current Balance:{balance}</div>
+      </form>
+    </>
+  );
+};
